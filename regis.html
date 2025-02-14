@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse</title>
+    <style>
+        /* Estilos de la página de registro */
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Registrarse</h2>
+        <form id="register-form">
+            <input type="text" id="username" name="username" placeholder="Usuario" required>
+            <input type="email" id="email" name="email" placeholder="Correo electrónico" required>
+            <input type="password" id="password" name="password" placeholder="Contraseña" required>
+            <button type="submit">Registrarse</button>
+        </form>
+        <p>¿Ya tienes una cuenta? <a href="login.html">Inicia sesión aquí</a></p>
+    </div>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevenir la recarga de la página
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Obtener la fecha actual
+            const registrationDate = new Date().toLocaleDateString();
+
+            // Guardar los datos en localStorage
+            localStorage.setItem('username', username);
+            localStorage.setItem('email', email);
+            localStorage.setItem('password', password);
+            localStorage.setItem('registrationDate', registrationDate);
+
+            // Redirigir a la página de bienvenida
+            window.location.href = 'welcome.html';
+        });
+    </script>
+
+</body>
+</html>

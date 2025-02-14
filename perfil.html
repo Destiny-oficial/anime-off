@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Usuario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+        }
+        header img {
+            height: 40px;
+        }
+        .menu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        .menu li {
+            margin: 0 10px;
+        }
+        .menu li a {
+            color: white;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .profile-header img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+        }
+        .profile-header h2 {
+            margin: 10px 0;
+        }
+        .profile-info, .update-form {
+            margin-bottom: 20px;
+        }
+        .profile-info p {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .form-group button:hover {
+            background-color: #555;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="https://qu.ax/JrOvP.jpg" alt="Logo">
+    <ul class="menu">
+        <li><a href="perfil.html" id="profile-link">Perfil</a></li>
+        <li><a href="logout.html" id="logout-link">Cerrar Sesión</a></li>
+    </ul>
+</header>
+
+<div class="container">
+    <div class="profile-header">
+        <img src="https://via.placeholder.com/120" alt="Foto de Usuario" id="profile-photo">
+        <h2 id="user-name">Cargando...</h2>
+        <p id="user-email">Cargando...</p>
+    </div>
+
+    <div class="profile-info">
+        <h3>Información del Usuario</h3>
+        <p><strong>Nombre:</strong> <span id="user-name-info">Cargando...</span></p>
+        <p><strong>Correo Electrónico:</strong> <span id="user-email-info">Cargando...</span></p>
+        <p><strong>Fecha de Creación:</strong> <span id="user-registration-date">Cargando...</span></p>
+    </div>
+
+    <div class="update-form">
+        <h3>Actualizar Datos</h3>
+        <form id="update-form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="update-name">Nombre</label>
+                <input type="text" id="update-name" placeholder="Introduce tu nuevo nombre">
+            </div>
+            <div class="form-group">
+                <label for="update-email">Correo Electrónico</label>
+                <input type="email" id="update-email" placeholder="Introduce tu nuevo correo electrónico">
+            </div>
+            <div class="form-group">
+                <label for="update-password">Nueva Contraseña</label>
+                <input type="password" id="update-password" placeholder="Introduce tu nueva contraseña">
+            </div>
+            <div class="form-group">
+                <label for="update-photo">Foto de Perfil</label>
+                <input type="file" id="update-photo" accept="image/*">
+            </div>
+            <div class="form-group">
+                <button type="submit">Actualizar Datos</button>
+                  <a href="dashboard.html" class="btn">👈volver al dashboard</a>
+    </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2025 Página de Anime. Todos los derechos reservados.</p>
+</footer>
+
+<script>
+    // Recuperar datos del usuario almacenados en localStorage
+    const userName = localStorage.getItem('username');
+    const userEmail = localStorage.getItem('email');
+    const registrationDate = localStorage.getItem('registrationDate');
+    const profilePhoto = localStorage.getItem('profilePhoto') || 'https://via.placeholder.com/120'; // Foto de perfil por defecto
+
+    // Mostrar datos del usuario
+    if (userName && userEmail && registrationDate) {
+        document.getElementById('user-name').textContent = userName;
+        document.getElementById('user-email').textContent = userEmail;
+        document.getElementById('user-name-info').textContent = userName;
+        document.getElementById('user-email-info').textContent = userEmail;
+        document.getElementById('user-registration-date').textContent = registrationDate;
+        document.getElementById('profile-photo').src = profilePhoto;
+    } else {
+        alert("No se encontró la información del usuario.");
+    }
+
+    // Actualizar datos del usuario
+    document.getElementById('update-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const newName = document.getElementById('update-name').value.trim();
+        const newEmail = document.getElementById('update-email').value.trim();
+        const newPassword = document.getElementById('update-password').value.trim();
+        const newPhoto = document.getElementById('update-photo').files[0];
+
+        if (newName) {
+            localStorage.setItem('username', newName);
+            document.getElementById('user-name').textContent = newName;
+            document.getElementById('user-name-info').textContent = newName;
+        }
+
+        if (newEmail) {
+            localStorage.setItem('email', newEmail);
+            document.getElementById('user-email').textContent = newEmail;
+            document.getElementById('user-email-info').textContent = newEmail;
+        }
+
+        if (newPassword) {
+            // Aquí puedes agregar la lógica para actualizar la contraseña
+            alert("Contraseña actualizada correctamente.");
+        }
+
+        // Subir y mostrar la nueva foto
+        if (newPhoto) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                localStorage.setItem('profilePhoto', e.target.result);
+                document.getElementById('profile-photo').src = e.target.result;
+            };
+            reader.readAsDataURL(newPhoto);
+        }
+
+        alert("Datos actualizados correctamente.");
+    });
+</script>
+
+</body>
+</html>
