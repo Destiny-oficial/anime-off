@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Usuario</title>
+    <style>
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+        }
+        header img {
+            height: 40px;
+        }
+        .menu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        .menu li {
+            margin: 0 10px;
+        }
+        .menu li a {
+            color: white;
+            text-decoration: none;
+        }
+        #profile-photo {
+            width: 100px;  /* Tamaño pequeño */
+            height: 100px; /* Tamaño pequeño */
+            border-radius: 50%; /* Hace la imagen circular */
+            object-fit: cover; /* Ajusta la imagen para que no se deforme */
+            display: block;
+            margin: 10px 0;
+        }
+        #verified-badge {
+            margin-left: 10px;
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    
+<header>
+    <img src="https://qu.ax/JrOvP.jpg" alt="Logo">
+    <ul class="menu">
+        <li><a href="juegos.html">Minijuegos</a></li>
+        <li><a href="perfil.html">Perfil</a></li>
+        <li><a href="#" id="logout-link">Cerrar Sesión</a></li>
+    </ul>
+</header>
+
+<h2>Perfil</h2>
+<img src="https://via.placeholder.com/120" alt="Foto de Usuario" id="profile-photo">
+<input type="file" id="photo-upload">
+<button id="update-photo">Subir Foto</button>
+
+<p><strong>Nombre:</strong> <span id="user-name">Cargando...</span><img src="verif.png" id="verified-badge" style="display: none;" alt="Verificado"></p>
+<input type="text" id="new-name" placeholder="Nuevo nombre">
+<button id="update-name" disabled>Actualizar Nombre</button>
+
+<p><strong>Correo Electrónico:</strong> <span id="user-email">Cargando...</span></p>
+<input type="email" id="new-email" placeholder="Nuevo correo">
+<button id="update-email" disabled>Actualizar Correo</button>
+
+<p><strong>Fecha de Creación:</strong> <span id="user-registration-date">Cargando...</span></p>
+
+<input type="password" id="new-password" placeholder="Nueva contraseña">
+<button id="update-password" disabled>Actualizar Contraseña</button>
+
+<button id="delete-account" disabled>Eliminar Cuenta</button>
+<button id="logout-btn">Cerrar Sesión</button>
+
+<p id="verified-badge-text">Verificando...</p>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAu0WbdAi8_yA2S6qKMUCLfty5w0PxgKVE",
+        authDomain: "anime-offis.firebaseapp.com",
+        projectId: "anime-offis",
+        storageBucket: "anime-offis.appspot.com",
+        messagingSenderId: "377121993034",
+        appId: "1:377121993034:web:a4ba7995e827bcbea411b3"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            const userRef = db.collection('users').doc(user.uid);
+            userRef.get().then(doc => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    document.getElementById('user-name').textContent = userData.username;
+                    document.getElementById('user-email').textContent = userData.email;
+                    document.getElementById('user-registration-date').textContent = new Date(userData.registrationDate).toLocaleDateString();
+                    document.getElementById('profile-photo').src = userData.profilePhoto;
+
+                    // Mostrar imagen de verificación si está verificado
+                    if (userData.verified) {
+                        document.getElementById('verified-badge').style.display = "inline"; // Muestra la imagen de verificación
+                        document.getElementById('verified-badge-text').innerHTML = "Cuenta Verificada";
+                        // Habilitar botones para usuarios verificados
+                        document.getElementById("update-name").disabled = false;
+                        document.getElementById("update-email").disabled = false;
+                        document.getElementById("update-password").disabled = false;
+                        document.getElementById("delete-account").disabled = false;
+                    } else {
+                        document.getElementById('verified-badge-text').innerHTML = "❌no puedes actualizar datos";
+                    }
+                }
+            }).catch(error => console.error("Error al obtener datos:", error));
+        } else {
+            window.location.href = "login.html";
+        }
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+        auth.signOut().then(() => window.location.href = "login.html")
+            .catch(error => console.error("Error al cerrar sesión:", error));
+    });
+
+    document.getElementById("update-name").addEventListener("click", () => {
+        const newName = document.getElementById("new-name").value;
+        const user = auth.currentUser;
+        if (newName.trim() !== "") {
+            db.collection("users").doc(user.uid).update({ username: newName })
+                .then(() => alert("Nombre actualizado"))
+                .catch(error => alert("Error: " + error.message));
+        }
+    });
+
+    document.getElementById("update-email").addEventListener("click", () => {
+        const newEmail = document.getElementById("new-email").value;
+        const user = auth.currentUser;
+        user.updateEmail(newEmail)
+            .then(() => {
+                return db.collection("users").doc(user.uid).update({ email: newEmail });
+            })
+            .then(() => {
+                return user.sendEmailVerification();
+            })
+            .then(() => alert("Correo actualizado. Verifica tu email."))
+            .catch(error => alert("Error: " + error.message));
+    });
+
+    document.getElementById("update-password").addEventListener("click", () => {
+        const newPassword = document.getElementById("new-password").value;
+        const user = auth.currentUser;
+        if (newPassword.length >= 6) {
+            user.updatePassword(newPassword)
+                .then(() => alert("Contraseña actualizada"))
+                .catch(error => alert("Error: " + error.message));
+        } else {
+            alert("La contraseña debe tener al menos 6 caracteres.");
+        }
+    });
+
+    document.getElementById("update-photo").addEventListener("click", () => {
+        const file = document.getElementById("photo-upload").files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                const base64Image = reader.result.split(',')[1]; // Extrae solo el Base64
+
+                fetch("https://api.imgbb.com/1/upload?key=5b0931fc3792f2069b046ef7eed268da", {
+                    method: "POST",
+                    body: new URLSearchParams({
+                        image: base64Image
+                    }),
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const url = data.data.url;
+                        document.getElementById("profile-photo").src = url;
+
+                        const user = firebase.auth().currentUser;
+                        return firebase.firestore().collection("users").doc(user.uid).update({
+                            profilePhoto: url
+                        });
+                    } else {
+                        throw new Error("Error en la respuesta de ImageBB");
+                    }
+                })
+                .then(() => alert("Foto de perfil actualizada"))
+                .catch(error => alert("Error al subir la imagen: " + error.message));
+            };
+        } else {
+            alert("Selecciona una imagen primero.");
+        }
+    });
+
+    document.getElementById("delete-account").addEventListener("click", () => {
+        const user = auth.currentUser;
+        if (confirm("¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es irreversible.")) {
+            db.collection("users").doc(user.uid).delete()
+                .then(() => user.delete())
+                .then(() => {
+                    alert("Cuenta eliminada");
+                    window.location.href = "register.html";
+                })
+                .catch(error => alert("Error: " + error.message));
+        }
+    });
+</script>
+
+</body>
+</html>
