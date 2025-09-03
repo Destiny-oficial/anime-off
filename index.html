@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar Sesión - Anime Offis</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    @import url('https://use.fontawesome.com/releases/v6.5.1/css/all.css');
+
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-image: url('mora.jpg'); /* Tu fondo */
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+
+    /* Estilo base para teléfonos*/
+    .login-box {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+
+    .login-box h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 25px;
+      background: #333;
+      color: #fff;
+    }
+
+    .login-box input::placeholder {
+      color: #ccc;
+    }
+
+    .password-container {
+      position: relative;
+    }
+
+    .toggle-password {
+      position: absolute;
+      top: 50%;
+      right: 15px;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #ccc;
+      cursor: pointer;
+    }
+
+    .login-box input[type="submit"] {
+      background-color: #45f3ff;
+      color: #111;
+      font-weight: bold;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+    .login-box input[type="submit"]:hover {
+      box-shadow: 0 0 10px #45f3ff;
+    }
+
+    .google-btn {
+      background-color: #fff;
+      color: #333;
+      font-weight: bold;
+      border: none;
+      border-radius: 25px;
+      padding: 12px;
+      width: 100%;
+      margin-top: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .google-btn i {
+      margin-right: 10px;
+      color: #ea4335;
+    }
+
+    .login-box .links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+
+    .login-box .links a {
+      color: #ff2770;
+      text-decoration: none;
+    }
+
+    .footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: gray;
+    }
+
+    #alerta-error {
+      background: #ff4d4d;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 0.9em;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    /* ---------------------------- */
+    /* ESTILO PARA COMPUTADORAS    */
+    /* ---------------------------- */
+    @media (min-width: 768px) {
+      body {
+        background-image: url('mora.jpg'); /* Tu fondo */
+     .login-box {
+  display: flex;
+  width: 90vw;
+  max-width: 1000px;
+  height: auto;
+  min-height: 500px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+      .left-panel {
+        background-color: #300060;
+        flex: 1;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: white;
+      }
+
+      .left-panel h1 {
+        font-size: 3em;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .left-panel .circles {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .left-panel .circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff69f4, #d69ad7);
+      }
+
+      .right-panel {
+        flex: 1;
+        background: #fff;
+        color: #333;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .right-panel input {
+        background: none;
+        border: none;
+        border-bottom: 2px solid #6a0dad;
+        color: #000;
+        border-radius: 0;
+      }
+
+      .right-panel input::placeholder {
+        color: #888;
+      }
+
+      .google-btn {
+        background: #eee;
+      }
+
+      .footer {
+        position: absolute;
+        bottom: 10px;
+        width: 100%;
+      }
+    }
+    @media (min-width: 992px) {
+  .login-container {
+    width: 70vw;
+    max-width: 1000px;
+    flex-direction: row;
+  }
+
+  .login-left, .login-right {
+    width: 50%;
+  }
+
+  .login-left {
+    border-top-left-radius: 30px;
+    border-bottom-left-radius: 30px;
+  }
+
+  .login-right {
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+  }
+}
+  </style>
+   <link rel="manifest" href="/anime-offis/manifest.json">
+<meta name="theme-color" content="#8000FF">
+</head>
+<body>
+
+<div class="login-box">
+  <div class="left-panel" style="display: none;">
+    <img src="login.png" alt="Anime Offis" style="max-width: 100%; height: auto;" />
+    <div class="circles">
+      <div class="circle" style="background: linear-gradient(135deg, #d41e9d, #b55da8);"></div>
+      <div class="circle" style="background: linear-gradient(135deg, #f8b5f8, #e8a4f9);"></div>
+      <div class="circle" style="background: linear-gradient(135deg, #f5e7f7, #d3c0da);"></div>
+      <div class="circle" style="background: linear-gradient(135deg, #dcd8e7, #c3b5d3);"></div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <form id="login-form">
+      <h2 style="text-align:center; margin-bottom: 20px;">¡Bienvenido!</h2>
+
+      <div id="alerta-error"></div>
+
+      <input type="email" id="email" placeholder="Correo electrónico" required />
+      <div class="password-container">
+        <input type="password" id="password" placeholder="Contraseña" required />
+        <button type="button" class="toggle-password" onclick="togglePassword()">
+          <i id="eye-icon" class="fa-solid fa-eye"></i>
+        </button>
+      </div>
+
+      <input type="submit" value="Ingresar" />
+
+      <button type="button" class="google-btn" onclick="loginConGoogle()">
+        <i class="fab fa-google"></i> Iniciar sesión con Google
+      </button>
+
+      <div class="links">
+        <a href="cambiar.html">¿Olvidaste tu contraseña?</a>
+        <a href="regis.html">Registrarse</a>
+      </div>
+
+      <p class="footer">Anime Offis© 2024 - 2025</p>
+    </form>
+  </div>
+</div>
+
+<script>
+  const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+  if (isDesktop) {
+    document.querySelector(".left-panel").style.display = "flex";
+  }
+
+  function togglePassword() {
+    const passwordField = document.getElementById("password");
+    const eyeIcon = document.getElementById("eye-icon");
+    if (passwordField.type === "password") {
+      passwordField.type = "text";
+      eyeIcon.classList.replace("fa-eye", "fa-eye-slash");
+    } else {
+      passwordField.type = "password";
+      eyeIcon.classList.replace("fa-eye-slash", "fa-eye");
+    }
+  }
+</script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAu0WbdAi8_yA2S6qKMUCLfty5w0PxgKVE",
+    authDomain: "anime-offis.firebaseapp.com",
+    projectId: "anime-offis",
+    storageBucket: "anime-offis.appspot.com",
+    messagingSenderId: "377121993034",
+    appId: "1:377121993034:web:a4ba7995e827bcbea411b3"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  document.getElementById("login-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    auth.signInWithEmailAndPassword(email, password)
+      .then(() => {
+        window.location.href = "dashboard.html";
+      })
+      .catch(error => {
+        const errorMessage = traducirError(error.code);
+        mostrarAlerta(errorMessage);
+      });
+  });
+
+  function loginConGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    // Forzar flujo web y evitar SHA-1
+    provider.setCustomParameters({
+        client_id: "377121993034-5meh53d7t9fv03jj07di27ev6636hibb.apps.googleusercontent.com",
+        prompt: "select_account"
+    });
+
+    auth.signInWithPopup(provider)
+        .then((result) => {
+            const user = result.user;
+
+            // Guardar el usuario en Firestore si no existe
+            firebase.firestore().collection("usuarios").doc(user.uid).set({
+                nombre: user.displayName || "",
+                email: user.email,
+                foto: user.photoURL || "",
+                creado: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true })
+            .then(() => {
+                window.location.href = "dashboard.html";
+            });
+        })
+        .catch(error => {
+            const errorMessage = traducirError(error.code);
+            mostrarAlerta(errorMessage);
+        });
+  }
+
+  function traducirError(codigo) {
+    switch (codigo) {
+      case 'auth/user-not-found':
+        return 'Usuario no encontrado. ¿Estás registrado?';
+      case 'auth/wrong-password':
+        return 'Contraseña incorrecta. Intenta de nuevo.';
+      case 'auth/invalid-email':
+        return 'Correo electrónico inválido.';
+      case 'auth/user-disabled':
+        return 'Este usuario ha sido deshabilitado.';
+      case 'auth/too-many-requests':
+        return 'Demasiados intentos. Espera un momento.';
+      case 'auth/popup-closed-by-user':
+        return 'Ventana de Google cerrada. Inténtalo otra vez.';
+      default:
+        return 'Ocurrió un error al iniciar sesión.';
+    }
+  }
+
+  function mostrarAlerta(mensaje) {
+    const alerta = document.getElementById("alerta-error");
+    alerta.textContent = mensaje;
+    alerta.style.display = "block";
+    setTimeout(() => {
+      alerta.style.display = "none";
+    }, 6000);
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        document.title = "¡vuelve te extrañamos 🥹";
+    } else {
+        document.title = "vive la experiencia del anime 🐱🥳";
+    }
+});
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/anime-offis/sw.js')
+      .then(reg => console.log('Service Worker registrado', reg))
+      .catch(err => console.log('Error en SW', err));
+  }
+</script>
+
+</body>
+</html>
