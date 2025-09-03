@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Asignar o Quitar Verificación</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #111; color: #fff; text-align: center; }
+    h2 { margin-top: 30px; }
+    .form-container {
+      margin: 30px auto;
+      padding: 20px;
+      background: #222;
+      border-radius: 10px;
+      max-width: 400px;
+    }
+    input {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      width: 90%;
+      border: none;
+      border-radius: 6px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      color: white;
+    }
+    .assign { background: #28a745; }
+    .remove { background: #dc3545; }
+  </style>
+</head>
+<body>
+  <h2>✅ Panel de Verificación</h2>
+
+  <div class="form-container">
+    <input type="text" id="userInput" placeholder="Correo o nombre del usuario">
+    <input type="text" id="verifInput" placeholder="Tipo de verificación (creador, beta, platinum...)">
+    <button class="assign" onclick="setVerification()">Asignar Verificación</button>
+    <button class="remove" onclick="removeVerification()">Quitar Verificación</button>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  
+  <script>
+    // Config Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAu0WbdAi8_yA2S6qKMUCLfty5w0PxgKVE",
+      authDomain: "anime-offis.firebaseapp.com",
+      projectId: "anime-offis",
+      storageBucket: "anime-offis.appspot.com",
+      messagingSenderId: "377121993034",
+      appId: "1:377121993034:web:a4ba7995e827bcbea411b3"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Buscar usuario por correo o username
+    async function findUser(userInput) {
+      let query = await db.collection("users")
+        .where("email", "==", userInput)
+        .get();
+
+      if (query.empty) {
+        query = await db.collection("users")
+          .where("username", "==", userInput)
+          .get();
+      }
+      return query;
+    }
+
+    // Asignar verificación
+    async function setVerification() {
+      const userInput = document.getElementById("userInput").value.trim().toLowerCase();
+      const verifInput = document.getElementById("verifInput").value.trim();
+
+      if (!userInput || !verifInput) {
+        alert("⚠️ Debes llenar ambos campos");
+        return;
+      }
+
+      try {
+        const query = await findUser(userInput);
+        if (query.empty) {
+          alert("❌ No se encontró el usuario");
+          return;
+        }
+
+        query.forEach(doc => {
+          db.collection("users").doc(doc.id).update({
+            verified: verifInput
+          });
+        });
+
+        alert("✅ Verificación asignada correctamente");
+      } catch (e) {
+        console.error(e);
+        alert("❌ Error al asignar verificación");
+      }
+    }
+
+    // Quitar verificación
+    async function removeVerification() {
+      const userInput = document.getElementById("userInput").value.trim().toLowerCase();
+      if (!userInput) {
+        alert("⚠️ Debes escribir el correo o nombre del usuario");
+        return;
+      }
+
+      try {
+        const query = await findUser(userInput);
+        if (query.empty) {
+          alert("❌ No se encontró el usuario");
+          return;
+        }
+
+        query.forEach(doc => {
+          db.collection("users").doc(doc.id).update({
+            verified: firebase.firestore.FieldValue.delete()
+          });
+        });
+
+        alert("✅ Verificación eliminada correctamente");
+      } catch (e) {
+        console.error(e);
+        alert("❌ Error al quitar verificación");
+      }
+    }
+  </script>
+</body>
+</html>
