@@ -570,7 +570,7 @@
 } else {
     // si no tiene verificación, ocultamos la animación
     document.querySelector(".animation-overlay").style.display = "none";
-
+            }
                         // --- Desbloquear marcos si es creador o beta ---
                         if (userData.verified === "creador" || userData.verified === "beta") {
                             document.querySelectorAll(".photo-frame.locked").forEach(f => {
@@ -582,7 +582,7 @@
                                 }
                             });
                         }
-                    }
+                    
 
                     if (!hasBadge) {
                         badgeTextElement.textContent = "❌ No Verificado";
