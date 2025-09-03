@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Usuario</title>
+    <style>
+        /* Estilo del encabezado */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+        }
+        header img {
+            height: 40px;
+        }
+        .menu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        .menu li {
+            margin: 0 10px;
+        }
+        .menu li a {
+            color: white;
+            text-decoration: none;
+        }
+        #profile-photo-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            display: inline-block;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        #profile-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .frame {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            width: calc(100% + 10px);
+            height: calc(100% + 10px);
+            border-radius: 50%;
+            border: 5px solid gold; /* Color de borde del marco */
+            pointer-events: none;
+            display: none; /* Ocultamos inicialmente */
+        }
+         .photo-frame {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #ccc;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        #verified-badge {
+            margin-left: 10px;
+            width: 25px;
+            height: 25px;
+        }
+        .ko-fi-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #ff5f5f;
+            color: white;
+            font-size: 16px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .ko-fi-button:hover {
+            background-color: #e04848;
+        }
+
+        /* Estilo para las opciones de fondos */
+        .background-option {
+            width: 100px;
+            height: 100px;
+            background-size: cover;
+            display: inline-block;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .message-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: green;
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .message-button:hover {
+        background-color: blue;
+    }
+    /* Estilo del botón sencillo */
+.upload-button {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #ccc;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #aaa;
+}
+
+.upload-button:hover {
+    background-color: #bbb;
+}
+
+/* Estilo para la vista previa de la foto de perfil */
+#profile-photo-container {
+    width: 150px;
+    height: 150px;
+    background-color: #f0f0f0;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+#profile-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.profile-section {
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-section label {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.profile-section textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.profile-section button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.profile-section button:hover {
+    background-color: #45a049;
+}
+  .sidebar {
+            position: fixed;
+            right: -250px;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #222;
+            transition: right 0.3s ease;
+            padding-top: 60px;
+            text-align: left;
+            box-shadow: -5px 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .sidebar a {
+            display: block;
+            padding: 15px;
+            color: white;
+            text-decoration: none;
+            border-bottom: 1px solid #444;
+        }
+        .sidebar a:hover {
+            background-color: #333;
+        }
+        .sidebar.show {
+            right: 0;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+        }
+        .overlay.show {
+            display: block;
+        }
+        .photo-frame.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.photo-frame.locked::after {
+  content: "🔒";
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  font-size: 18px;
+  color: red;
+}
+/* Contenedor de cada marco con su texto */
+.frame-option {
+  display: inline-block;
+  text-align: center;
+  margin: 10px;
+}
+
+/* Texto debajo de cada marco */
+.frame-text {
+  font-size: 14px;
+  margin-top: 5px;
+  font-weight: bold;
+}
+
+/* Texto para marcos gratis */
+.frame-text.free {
+  color: green;
+}
+
+/* Texto para marcos exclusivos bloqueados */
+.frame-text.locked {
+  color: red;
+}
+
+/* Texto cuando se desbloquea (creador/beta) */
+.frame-text.unlocked {
+  color: limegreen;
+}
+
+/* Contenedor de la animación */
+.animation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999; /* encima de todo */
+  pointer-events: none; /* no bloquea clicks */
+  background: rgba(0, 0, 0, 0.6); /* leve oscurecimiento */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeOut 6s forwards;
+}
+
+/* Estrellas que brillan en toda la pantalla */
+.stars {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  animation: sparkle 2s infinite;
+  pointer-events: none;
+}
+
+@keyframes sparkle {
+  0% { box-shadow: 0 0 5px #fff inset, 0 0 15px #ffd700 inset, 0 0 30px #ff69b4 inset; }
+  50% { box-shadow: 0 0 10px #87ceeb inset, 0 0 20px #00ffff inset, 0 0 40px #ff69b4 inset; }
+  100% { box-shadow: 0 0 5px #fff inset, 0 0 15px #ffd700 inset, 0 0 30px #ff69b4 inset; }
+}
+
+/* Luna oscura en el centro */
+/* Luna con imagen */
+.moon {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-image: url('luna.png'); /* Pon aquí la ruta de tu imagen */
+  background-size: cover;      /* Para que la imagen cubra toda la luna */
+  background-position: center; /* Centra la imagen */
+  opacity: 0;
+  animation: moonFade 6s ease-in-out forwards;
+}
+
+/* Animación de luna */
+@keyframes moonFade {
+  0% { opacity: 0; transform: scale(0.5); }
+  20% { opacity: 1; transform: scale(1); }
+  80% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+/* Desaparecer overlay */
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+.stars {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Cada estrella como imagen */
+.star {
+  position: absolute;
+  width: 20px;  /* tamaño de la estrella */
+  height: 20px;
+  background-image: url('estrellas.png'); /* reemplaza con la ruta de tu imagen */
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+/* Animación de parpadeo */
+@keyframes twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.animation-overlay {
+  display: none; /* Oculta siempre al inicio */
+}
+   </style>
+</head>
+<body>
+<header>
+    <img src="offis.png" alt="Logo">
+    <button class="menu-toggle">&#9776;</button>
+    <div class="sidebar">
+        <a href="dashboard.html">volver al dashboard</a>
+        <a href="https://destiny-oficial.github.io/Nadaxd/dashboard.html">Animes</a>
+        <a href="https://destiny-oficial.github.io/mangas-offis/">Mangas</a>
+        <a href="https://destiny-oficial.github.io/Novel-offis/">Novelas</a>
+        <a href="https://destiny-oficial.github.io/hentai-offis/">Hentai</a>
+        <a href="https://destiny-oficial.github.io/Games/index.html">Juegos</a>
+        <a href="perfil.html">Perfil</a>
+        <a href="logout.html">Cerrar Sesión</a>
+        <a href="mensajeprv.html">mandar mensajes</a>
+        <a href="meli.html">fandubs exclusivos Meli </a>
+        <a href="ajustes.html">ajustes</a>
+    </div>
+    
+    <div class="overlay"></div>
+</header>
+
+<a href="dashboard.html">⬅️ dashboard</a>
+
+<div class="animation-overlay">
+    <div class="stars"></div>
+    <div class="moon"></div>
+  </div>
+  
+  <div class="stars">
+  <div class="star" style="top:5%; left:10%; animation-delay: 0s;"></div>
+  <div class="star" style="top:20%; left:50%; animation-delay: 1s;"></div>
+  <div class="star" style="top:40%; left:30%; animation-delay: 2s;"></div>
+  <div class="star" style="top:70%; left:80%; animation-delay: 3s;"></div>
+  <div class="star" style="top:90%; left:60%; animation-delay: 4s;"></div>
+</div>
+
+<div id="profile-photo-container">
+    <img src="https://via.placeholder.com/120" alt="Foto de Usuario" id="profile-photo">
+    <img src="frame1.png" alt="Marco 1" class="frame" id="frame1">
+    <img src="frame2.png" alt="Marco 2" class="frame" id="frame2">
+    <img src="frame3.png" alt="Marco 3" class="frame" id="frame3">
+    <img src="frame4.png" alt="Marco 4" class="frame" id="frame4">
+</div>
+
+<label for="file-input" class="upload-button">Subir Foto de Perfil</label>
+<input type="file" id="file-input" accept="image/*" style="display: none;">
+
+<!-- Elementos de usuario -->
+<div class="profile-section">
+    <label for="bio">Acerca de mí</label>
+    <textarea id="bio" placeholder="Escribe algo sobre ti..."></textarea>
+    <button id="save-bio">Guardar biografía</button>
+</div>
+
+<a href="repro.html">reproductor</a>
+
+<p>
+    <strong>Nombre:</strong> <span id="user-name">Cargando...</span>
+    <img src="verif.png" id="verified-badge" style="display: none;" alt="Verificado">
+</p>
+
+<a href="verificación.html" target="_blank" class="ko-fi-button" id="verify-button">
+    Verifica tu cuenta con una insignia no disponible actualmente 
+</a>
+
+<p id="verified-badge-text">Verificando...</p>
+    
+<p><strong>Fecha de Creación:</strong> <span id="user-registration-date">Cargando...</span></p>
+
+<a href="mensajeprv.html" class="message-button">Envía mensaje</a>
+
+<!-- Sección para elegir marcos de perfil -->
+<h3>Elige tu marco:</h3>
+<div id="photo-frames-container">
+    <div id="photo-frames">
+
+        <!-- Marcos gratis -->
+        <div class="frame-option">
+            <img src="frame1.png" alt="Marco Gratis" class="photo-frame" data-frame="frame1">
+            <p class="frame-text">✅ Gratis</p>
+        </div>
+        <div class="frame-option">
+            <img src="frame2.png" alt="Marco Gratis 2" class="photo-frame" data-frame="frame2">
+            <p class="frame-text">✅ Gratis</p>
+        </div>
+
+        <!-- Marcos exclusivos -->
+        <div class="frame-option">
+            <img src="frame3.png" alt="Marco 3" class="photo-frame locked" data-frame="frame3">
+            <p class="frame-text">🔒 Exclusivo Beta</p>
+        </div>
+        <div class="frame-option">
+            <img src="frame4.png" alt="Marco 4" class="photo-frame locked" data-frame="frame4">
+            <p class="frame-text">🔒 Exclusivo Beta</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+    // --- Sidebar ---
+    const menuToggle = document.querySelector('.menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.overlay');
+
+    menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('show');
+        overlay.classList.toggle('show');
+    });
+
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('show');
+        overlay.classList.remove('show');
+    });
+
+    // --- Firebase Config ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyAu0WbdAi8_yA2S6qKMUCLfty5w0PxgKVE",
+        authDomain: "anime-offis.firebaseapp.com",
+        projectId: "anime-offis",
+        storageBucket: "anime-offis.appspot.com",
+        messagingSenderId: "377121993034",
+        appId: "1:377121993034:web:a4ba7995e827bcbea411b3"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // --- Cargar datos de usuario ---
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userIdFromUrl = urlParams.get('usuario');
+            let userIdToFetch = userIdFromUrl ? userIdFromUrl : user.uid;
+
+            const userRef = db.collection('users').doc(userIdToFetch);
+            userRef.get().then(doc => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    document.getElementById('user-name').textContent = userData.username;
+                    document.getElementById('user-registration-date').textContent =
+                        new Date(userData.registrationDate).toLocaleDateString();
+                    document.getElementById('profile-photo').src = userData.profilePhoto;
+
+                    const verifiedBadge = document.getElementById('verified-badge');
+                    const verifyButton = document.getElementById('verify-button');
+                    const badgeTextElement = document.getElementById('verified-badge-text');
+
+                    let badgeSrc = "";
+                    let badgeText = "";
+                    let hasBadge = false;
+
+                    // --- Revisar insignias ---
+                    if (userData.verified) {
+    switch (userData.verified) {
+        case "creador":
+            badgeSrc = "crea.png";
+            badgeText = "Verificado (tarjeta de diamante de creador ❄️)";
+            document.querySelector(".animation-overlay").style.display = "flex";
+            break;
+        case "beta":
+            badgeSrc = "beta.png";
+            badgeText = "⚙️ Usuario Beta Anime Offis";
+            document.querySelector(".animation-overlay").style.display = "flex";
+            break;
+        case "platinum":
+            badgeSrc = "plat.png";
+            badgeText = "👑 Usuario Platinum";
+            document.querySelector(".animation-overlay").style.display = "flex";
+            break;
+        case "imperial":
+            badgeSrc = "imperial.png";
+            badgeText = "🏆 Usuario Imperial";
+            document.querySelector(".animation-overlay").style.display = "flex";
+            break;
+        case "colaborador":
+            badgeSrc = "cola.png";
+            badgeText = "🤝 En colaboración con (Anime Offis)";
+            document.querySelector(".animation-overlay").style.display = "flex";
+            break;
+        case "aportador":
+            badgeSrc = "aportador.png";
+            badgeText = "⚡ Trabajador en Anime Offis (aportador)";
+            document.querySelector(".animation-overlay").style.display = "flex";
+            break;
+        case "soporte":
+            badgeSrc = "soport.png";
+            badgeText = "✅ Trabajador de Anime Offis (Soporte)";
+            document.querySelector(".animation-overlay").style.display = "flex";
+            break;
+        case "dora":
+            badgeSrc = "verif.png";
+            badgeText = "✅ Verificado (premium)";
+            document.querySelector(".animation-overlay").style.display = "none";
+            break;
+        case "azul":
+            badgeSrc = "azul.png";
+            badgeText = "✅ Verificado (fan Anime Offis)";
+            document.querySelector(".animation-overlay").style.display = "none";
+            break;
+        case "verde":
+            badgeSrc = "verde.png";
+            badgeText = "✅ Verificado (fan básico)";
+            document.querySelector(".animation-overlay").style.display = "none";
+            break;
+        default:
+            badgeSrc = "verde.png";
+            badgeText = "✅ Verificado";
+            document.querySelector(".animation-overlay").style.display = "none";
+            break;
+    }
+
+    verifiedBadge.src = badgeSrc;
+    verifiedBadge.style.display = "inline";
+    badgeTextElement.textContent = badgeText;
+    hasBadge = true;
+} else {
+    // si no tiene verificación, ocultamos la animación
+    document.querySelector(".animation-overlay").style.display = "none";
+
+                        // --- Desbloquear marcos si es creador o beta ---
+                        if (userData.verified === "creador" || userData.verified === "beta") {
+                            document.querySelectorAll(".photo-frame.locked").forEach(f => {
+                                f.classList.remove("locked");
+                            });
+                            document.querySelectorAll(".frame-option .frame-text").forEach(t => {
+                                if (t.textContent.includes("Exclusivo Beta/Creador")) {
+                                    t.textContent = "✅ Desbloqueado";
+                                }
+                            });
+                        }
+                    }
+
+                    if (!hasBadge) {
+                        badgeTextElement.textContent = "❌ No Verificado";
+                    }
+
+                    // Mostrar / ocultar botón verificación
+                    if (hasBadge) {
+                        verifyButton.style.display = "none";
+                        document.getElementById('photo-frames-container').style.display = 'block';
+                    } else {
+                        verifyButton.style.display = "inline-block";
+                        verifyButton.textContent =
+                            "Verifica tu cuenta con una insignia (disponible el 20 de septiembre)";
+                        document.getElementById('photo-frames-container').style.display = 'none';
+                    }
+
+                    // --- Mostrar marco seleccionado ---
+                    const selectedFrame = userData.profileFrame;
+                    if (selectedFrame) {
+                        document.getElementById(selectedFrame).style.display = 'block';
+                    }
+                } else {
+                    document.getElementById('user-name').textContent = "Usuario no encontrado";
+                    document.getElementById('user-registration-date').textContent = "";
+                    document.getElementById('profile-photo').src = "";
+                }
+            }).catch(error => {
+                console.error("Error al obtener datos del usuario:", error);
+                document.getElementById('user-name').textContent = "Error al cargar el perfil";
+            });
+        } else {
+            window.location.href = "login.html";
+        }
+    });
+
+    // --- Lógica marcos ---
+    document.querySelectorAll('.photo-frame').forEach(frame => {
+        frame.addEventListener('click', function () {
+            if (this.classList.contains("locked")) {
+                alert("❌ Este marco está disponible solo para usuarios Beta.");
+                return;
+            }
+
+            const selectedFrame = this.getAttribute('data-frame');
+            const frames = document.querySelectorAll('.frame');
+
+            // Ocultar todos los marcos
+            frames.forEach(f => f.style.display = 'none');
+
+            // Mostrar el marco seleccionado
+            document.getElementById(selectedFrame).style.display = 'block';
+
+            // Guardar marco en Firestore
+            const user = firebase.auth().currentUser;
+            if (user) {
+                db.collection('users').doc(user.uid).update({
+                    profileFrame: selectedFrame
+                }).then(() => {
+                    console.log('Marco actualizado correctamente');
+                }).catch(error => {
+                    console.error("Error al guardar el marco:", error);
+                });
+            }
+        });
+    });
+
+    // --- Fondos personalizados ---
+    document.querySelectorAll('.background-option').forEach(background => {
+        background.addEventListener('click', function () {
+            const selectedBackground = this.getAttribute('data-background');
+            document.body.style.backgroundImage = `url('${selectedBackground}')`;
+
+            const user = firebase.auth().currentUser;
+            if (user) {
+                db.collection('users').doc(user.uid).update({
+                    profileBackground: selectedBackground
+                }).then(() => {
+                    console.log('Fondo actualizado correctamente');
+                }).catch(error => {
+                    console.error("Error al guardar el fondo:", error);
+                });
+            }
+        });
+    });
+
+    // --- Subida de foto a imgBB ---
+    const fileInput = document.getElementById('file-input');
+    const profilePhoto = document.getElementById('profile-photo');
+    const apiKey = '5b0931fc3792f2069b046ef7eed268da';
+
+    fileInput.addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            fetch('https://api.imgbb.com/1/upload?key=' + apiKey, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const imageUrl = data.data.url;
+                        profilePhoto.src = imageUrl;
+
+                        const user = firebase.auth().currentUser;
+                        if (user) {
+                            db.collection('users').doc(user.uid).update({
+                                profilePhoto: imageUrl
+                            }).then(() => {
+                                console.log('Foto de perfil actualizada correctamente');
+                            }).catch(error => {
+                                console.error("Error al actualizar la foto de perfil:", error);
+                            });
+                        }
+                    } else {
+                        console.error('Error al subir la imagen', data.error.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar la imagen a imgBB:', error);
+                });
+        }
+    });
+
+    // --- Biografía ---
+    function loadBio() {
+        const user = firebase.auth().currentUser;
+        const urlParams = new URLSearchParams(window.location.search);
+        const userIdFromUrl = urlParams.get('usuario');
+        const userIdToFetch = userIdFromUrl ? userIdFromUrl : user?.uid;
+
+        if (!userIdToFetch) return;
+
+        const userRef = db.collection('users').doc(userIdToFetch);
+        userRef.get().then(doc => {
+            if (doc.exists) {
+                const userData = doc.data();
+                document.getElementById('bio').value = userData.bio
+                    ? userData.bio
+                    : "Amante del anime con Anime Offis......";
+            }
+        }).catch(error => {
+            console.error("Error al obtener la biografía:", error);
+        });
+    }
+
+    window.onload = loadBio;
+
+    document.getElementById('save-bio').addEventListener('click', () => {
+        const bio = document.getElementById('bio').value;
+        const user = firebase.auth().currentUser;
+
+        if (user) {
+            db.collection('users').doc(user.uid).update({
+                bio: bio
+            }).then(() => {
+                alert('✅ Biografía guardada correctamente.');
+            }).catch(error => {
+                console.error("Error al guardar la biografía:", error);
+            });
+        }
+    });
+    window.onload = () => {
+    const overlay = document.querySelector('.animation-overlay');
+    // Se quita solo después de la animación (6s)
+    setTimeout(() => {
+      overlay.style.display = "none";
+    }, 6000);
+  };
+</script>
+</body>
+</html>
