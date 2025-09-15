@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verificación por Código</title>
+<style>
+  body {
+    background-color: #0b0b0c;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 50px;
+  }
+  input, button {
+    padding: 10px;
+    margin: 5px;
+    font-size: 16px;
+  }
+  #insignias-container img {
+    width: 50px;
+    margin: 5px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Ingresa tu código de regalo</h1>
+<input type="text" id="code-input" placeholder="Código">
+<button id="verify-btn">Verificar</button>
+
+<div id="insignias-container"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+  // Configuración Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyAu0WbdAi8_yA2S6qKMUCLfty5w0PxgKVE",
+    authDomain: "anime-offis.firebaseapp.com",
+    projectId: "anime-offis",
+    storageBucket: "anime-offis.appspot.com",
+    messagingSenderId: "377121993034",
+    appId: "1:377121993034:web:a4ba7995e827bcbea411b3"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // Mapa de insignias
+  const insigniasMap = {
+    "creador": {src:"crea.png", text:"Creador ❄️"},
+    "beta": {src:"beta.png", text:"Usuario Beta ⚙️"},
+    "platinum": {src:"plat.png", text:"Platinum 👑"},
+    "imperial": {src:"imperial.png", text:"Imperial 🏆"},
+    "colaborador": {src:"cola.png", text:"Colaborador 🤝"},
+    "aportador": {src:"aportador.png", text:"Aportador ⚡"},
+    "soporte": {src:"soport.png", text:"Soporte ✅"},
+    "dora": {src:"verif.png", text:"Verificado Premium ✅"},
+    "azul": {src:"azul.png", text:"Fan Anime Offis ✅"},
+    "verde": {src:"verde.png", text:"Fan Básico ✅"}
+  };
+
+  const validCodes = {
+    "CREADOR123": "creador",
+    "BETA456": "beta",
+    "PLAT789": "platinum",
+    "IMPERIAL001": "imperial",
+    "COLA002": "colaborador",
+    "APOR003": "aportador",
+    "SOPORTE004": "soporte",
+    "DORA005": "dora",
+    "AZUL006": "azul",
+    "VERDE007": "verde"
+  };
+
+  const userId = "usuario_demo"; // Aquí puedes usar el UID real del usuario
+
+  const codeInput = document.getElementById("code-input");
+  const verifyBtn = document.getElementById("verify-btn");
+  const insigniasContainer = document.getElementById("insignias-container");
+
+  verifyBtn.addEventListener("click", async () => {
+    const code = codeInput.value.trim().toUpperCase();
+    if (!validCodes[code]) {
+      alert("Código inválido");
+      return;
+    }
+
+    const verificacion = validCodes[code];
+
+    // Guardar verificación en Firestore
+    const userRef = db.collection("users").doc(userId);
+    const userDoc = await userRef.get();
+    let currentVerifications = [];
+    if (userDoc.exists && Array.isArray(userDoc.data().verified)) {
+      currentVerifications = userDoc.data().verified;
+    }
+
+    if (!currentVerifications.includes(verificacion)) {
+      currentVerifications.push(verificacion);
+      await userRef.set({verified: currentVerifications}, {merge: true});
+    }
+
+    renderInsignias(currentVerifications);
+    alert(`¡Código válido! Se te ha asignado la verificación: ${insigniasMap[verificacion].text}`);
+  });
+
+  function renderInsignias(verifications) {
+    insigniasContainer.innerHTML = "";
+    verifications.forEach(v => {
+      const info = insigniasMap[v.toLowerCase()];
+      if (info) {
+        const img = document.createElement("img");
+        img.src = info.src;
+        img.title = info.text;
+        insigniasContainer.appendChild(img);
+      }
+    });
+  }
+
+  // Al cargar la página, mostrar insignias actuales
+  (async function init() {
+    const userDoc = await db.collection("users").doc(userId).get();
+    if (userDoc.exists && userDoc.data().verified) {
+      const userVerifications = Array.isArray(userDoc.data().verified)
+        ? userDoc.data().verified
+        : [userDoc.data().verified];
+      renderInsignias(userVerifications);
+    }
+  })();
+</script>
+</body>
+</html>
