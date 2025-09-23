@@ -1,29 +1,28 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verificación por Código</title>
-<style>
-  body {
-    background-color: #0b0b0c;
-    color: white;
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 50px;
-  }
-  input, button {
-    padding: 10px;
-    margin: 5px;
-    font-size: 16px;
-  }
-  #insignias-container img {
-    width: 50px;
-    margin: 5px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Verificación por Código</title>
+  <style>
+    body {
+      background-color: #0b0b0c;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+    }
+    #insignias-container img {
+      width: 50px;
+      margin: 5px;
+    }
+  </style>
 </head>
 <body>
 
@@ -36,9 +35,9 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
 <script>
-  // Configuración Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyAu0WbdAi8_yA2S6qKMUCLfty5w0PxgKVE",
     authDomain: "anime-offis.firebaseapp.com",
@@ -49,8 +48,8 @@
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+  const auth = firebase.auth();
 
-  // Mapa de insignias
   const insigniasMap = {
     "creador": {src:"crea.png", text:"Creador ❄️"},
     "beta": {src:"beta.png", text:"Usuario Beta ⚙️"},
@@ -64,55 +63,69 @@
     "verde": {src:"verde.png", text:"Fan Básico ✅"}
   };
 
-  const validCodes = {
-    "CREADOR123": "creador",
-    "BETA456": "beta",
-    "PLAT789": "platinum",
-    "IMPERIAL001": "imperial",
-    "COLA002": "colaborador",
-    "APOR003": "aportador",
-    "SOPORTE004": "soporte",
-    "DORA005": "dora",
-    "AZUL006": "azul",
-    "VERDE007": "verde"
-  };
-
-  const userId = "usuario_demo"; // Aquí puedes usar el UID real del usuario
-
   const codeInput = document.getElementById("code-input");
   const verifyBtn = document.getElementById("verify-btn");
   const insigniasContainer = document.getElementById("insignias-container");
 
+  let currentUserId = null;
+
+  auth.onAuthStateChanged(async user => {
+    if (user) {
+      currentUserId = user.uid;
+      const userRef = db.collection("users").doc(currentUserId);
+      const userDoc = await userRef.get();
+      if (!userDoc.exists) return;
+
+      let verifications = userDoc.data().verified || [];
+      verifications = cleanExpired(verifications);
+      await userRef.set({verified: verifications}, {merge: true});
+      renderInsignias(verifications);
+    } else {
+      alert("Debes iniciar sesión para usar esta función.");
+    }
+  });
+
   verifyBtn.addEventListener("click", async () => {
-    const code = codeInput.value.trim().toUpperCase();
-    if (!validCodes[code]) {
-      alert("Código inválido");
+    if (!currentUserId) {
+      alert("Usuario no autenticado.");
       return;
     }
 
-    const verificacion = validCodes[code];
+    const code = codeInput.value.trim().toUpperCase();
+    const codeDoc = await db.collection("codes").doc(code).get();
+    if (!codeDoc.exists) {
+      alert("Código inválido o no registrado.");
+      return;
+    }
 
-    // Guardar verificación en Firestore
-    const userRef = db.collection("users").doc(userId);
+    const { tipo, duracion } = codeDoc.data();
+    const userRef = db.collection("users").doc(currentUserId);
     const userDoc = await userRef.get();
-    let currentVerifications = [];
-    if (userDoc.exists && Array.isArray(userDoc.data().verified)) {
-      currentVerifications = userDoc.data().verified;
+    if (!userDoc.exists) return;
+
+    let verifications = userDoc.data().verified || [];
+    verifications = cleanExpired(verifications);
+
+    const alreadyHas = verifications.some(v => v.tipo === tipo);
+    if (!alreadyHas) {
+      const expira = duracion ? Date.now() + duracion * 86400000 : null;
+      verifications.push({tipo, expira});
+      await userRef.set({verified: verifications}, {merge: true});
     }
 
-    if (!currentVerifications.includes(verificacion)) {
-      currentVerifications.push(verificacion);
-      await userRef.set({verified: currentVerifications}, {merge: true});
-    }
-
-    renderInsignias(currentVerifications);
-    alert(`¡Código válido! Se te ha asignado la verificación: ${insigniasMap[verificacion].text}`);
+    renderInsignias(verifications);
+    alert(`¡Código válido! Se te ha asignado la verificación: ${insigniasMap[tipo]?.text || tipo}`);
   });
+
+  function cleanExpired(verifications) {
+    const now = Date.now();
+    return verifications.filter(v => !v.expira || v.expira > now);
+  }
 
   function renderInsignias(verifications) {
     insigniasContainer.innerHTML = "";
     verifications.forEach(v => {
-      const info = insigniasMap[v.toLowerCase()];
+      const info = insigniasMap[v.tipo.toLowerCase()];
       if (info) {
         const img = document.createElement("img");
         img.src = info.src;
@@ -121,17 +134,6 @@
       }
     });
   }
-
-  // Al cargar la página, mostrar insignias actuales
-  (async function init() {
-    const userDoc = await db.collection("users").doc(userId).get();
-    if (userDoc.exists && userDoc.data().verified) {
-      const userVerifications = Array.isArray(userDoc.data().verified)
-        ? userDoc.data().verified
-        : [userDoc.data().verified];
-      renderInsignias(userVerifications);
-    }
-  })();
 </script>
 </body>
 </html>

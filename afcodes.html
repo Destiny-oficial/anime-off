@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel de Códigos - Anime Offis</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+    }
+    input, select, button {
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+    }
+    .code-list {
+      margin-top: 30px;
+    }
+    .code-item {
+      background: #1e1e1e;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-left: 4px solid #00bcd4;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Panel de Administración de Códigos</h1>
+
+<input type="text" id="code-input" placeholder="Código único (ej. PLAT999)">
+<select id="tipo-select">
+  <option value="platinum">Platinum 👑</option>
+  <option value="beta">Beta ⚙️</option>
+  <option value="imperial">Imperial 🏆</option>
+  <option value="colaborador">Colaborador 🤝</option>
+  <option value="aportador">Aportador ⚡</option>
+  <option value="soporte">Soporte ✅</option>
+  <option value="dora">Verificado Premium ✅</option>
+  <option value="azul">Fan Anime Offis ✅</option>
+  <option value="verde">Fan Básico ✅</option>
+</select>
+<input type="number" id="duracion-input" placeholder="Duración en días (0 = permanente)">
+<button id="crear-btn">Crear código</button>
+
+<div class="code-list" id="code-list"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAu0WbdAi8_yA2S6qKMUCLfty5w0PxgKVE",
+    authDomain: "anime-offis.firebaseapp.com",
+    projectId: "anime-offis",
+    storageBucket: "anime-offis.appspot.com",
+    messagingSenderId: "377121993034",
+    appId: "1:377121993034:web:a4ba7995e827bcbea411b3"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+
+  const codeInput = document.getElementById("code-input");
+  const tipoSelect = document.getElementById("tipo-select");
+  const duracionInput = document.getElementById("duracion-input");
+  const crearBtn = document.getElementById("crear-btn");
+  const codeList = document.getElementById("code-list");
+
+  let adminUID = null;
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      adminUID = user.uid;
+      cargarCodigos();
+    } else {
+      alert("Debes iniciar sesión como administrador.");
+    }
+  });
+
+  crearBtn.addEventListener("click", async () => {
+    const code = codeInput.value.trim().toUpperCase();
+    const tipo = tipoSelect.value;
+    const duracion = parseInt(duracionInput.value);
+
+    if (!code || !tipo || isNaN(duracion)) {
+      alert("Completa todos los campos correctamente.");
+      return;
+    }
+
+    const codeRef = db.collection("codes").doc(code);
+    const doc = await codeRef.get();
+    if (doc.exists) {
+      alert("Este código ya existe.");
+      return;
+    }
+
+    await codeRef.set({
+      tipo,
+      duracion: duracion > 0 ? duracion : null,
+      creadoPor: adminUID,
+      creadoEn: Date.now()
+    });
+
+    alert("Código creado exitosamente.");
+    codeInput.value = "";
+    duracionInput.value = "";
+    cargarCodigos();
+  });
+
+  async function cargarCodigos() {
+    const snapshot = await db.collection("codes").orderBy("creadoEn", "desc").get();
+    codeList.innerHTML = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const div = document.createElement("div");
+      div.className = "code-item";
+      div.innerHTML = `<strong>${doc.id}</strong> → ${data.tipo} (${data.duracion ? data.duracion + " días" : "permanente"})`;
+      codeList.appendChild(div);
+    });
+  }
+</script>
+</body>
+</html>
